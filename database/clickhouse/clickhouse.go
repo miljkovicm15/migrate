@@ -155,7 +155,7 @@ func (ch *ClickHouse) Run(r io.Reader) error {
 		return err
 	}
 
-	migration, err := ioutil.ReadAll(r)
+	migration, err := io.ReadAll(r)
 	if err != nil {
 		return err
 	}
