@@ -1,6 +1,7 @@
 package clickhouse
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"io"
@@ -141,7 +142,9 @@ func (ch *ClickHouse) Run(r io.Reader) error {
 			if tq == "" {
 				return true
 			}
-			if _, e := ch.conn.Exec(string(m)); e != nil {
+			ctx, cancel := context.WithTimeout(context.Background(), 40*time.Minute)
+			defer cancel()
+			if _, e := ch.conn.ExecContext(ctx, string(m)); e != nil {
 				err = database.Error{OrigErr: e, Err: "migration failed", Query: m}
 				return false
 			}
@@ -152,7 +155,7 @@ func (ch *ClickHouse) Run(r io.Reader) error {
 		return err
 	}
 
-	migration, err := io.ReadAll(r)
+	migration, err := ioutil.ReadAll(r)
 	if err != nil {
 		return err
 	}
